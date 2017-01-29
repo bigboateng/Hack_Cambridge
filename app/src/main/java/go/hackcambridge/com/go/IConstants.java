@@ -9,6 +9,8 @@ public interface IConstants {
 
     // api url
     String API_URL = "https://go-hackcambridge.herokuapp.com";
+    String SKYSCANNER_URL = "http://partners.api.skyscanner.net/";
+    String SKYSCANNER_API_KEY = "prtl6749387986743898559646983194";
 
     // modes
     String MODE = "mode";

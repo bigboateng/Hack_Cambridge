@@ -77,6 +77,7 @@ public class ActivityRecord extends AppCompatActivity implements View.OnClickLis
     Retrofit mRetrofit;
     TourApi mTourApi;
     EditText mAuthorEditText;
+    EditText mProperyName;
 
     // language chooser
     Spinner mLanguageChooserSpinner;
@@ -139,7 +140,7 @@ public class ActivityRecord extends AppCompatActivity implements View.OnClickLis
             }
         });
         mAuthorEditText = (EditText)findViewById(R.id.authorEditText);
-
+        mProperyName = (EditText)findViewById(R.id.propertyText);
     }
 
     @Override
@@ -202,6 +203,7 @@ public class ActivityRecord extends AppCompatActivity implements View.OnClickLis
                                 break;
                         }
                         tour.setAuthor(mAuthorEditText.getText().toString());
+                        tour.setName(mProperyName.getText().toString());
                         Call<TourPostResponse> call2 = mTourApi.postTourData(tour);
                         Log.d(TAG, "URL = " + response.body().getUrl());
                         postTourData(call2);

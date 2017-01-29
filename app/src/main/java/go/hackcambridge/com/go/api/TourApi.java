@@ -3,6 +3,7 @@ package go.hackcambridge.com.go.api;
 import java.util.ArrayList;
 
 import go.hackcambridge.com.go.models.AudioResponse;
+import go.hackcambridge.com.go.models.Hotel;
 import go.hackcambridge.com.go.models.Tour;
 import go.hackcambridge.com.go.models.TourPostResponse;
 import okhttp3.MultipartBody;
@@ -28,4 +29,7 @@ public interface TourApi {
 
     @POST("/cat")
     Call<TourPostResponse> postTourData(@Body Tour tour);
+
+    @GET("/hotel")
+    Call<ArrayList<Hotel>> getHotels();
 }

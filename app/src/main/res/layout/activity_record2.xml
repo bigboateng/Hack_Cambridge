@@ -56,6 +56,13 @@
         </LinearLayout>
 
         <EditText
+            android:id="@+id/propertyText"
+            android:layout_margin="16dp"
+            android:hint="Name of hotel/property"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <EditText
             android:id="@+id/authorEditText"
             android:layout_margin="16dp"
             android:hint="Enter your name"

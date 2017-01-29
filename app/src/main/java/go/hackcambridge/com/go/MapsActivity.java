@@ -26,6 +26,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Spinner;
@@ -47,14 +48,20 @@ import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.gson.JsonObject;
 import com.squareup.picasso.Picasso;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.w3c.dom.Text;
 
 import java.io.IOException;
 import java.util.ArrayList;
 
+import go.hackcambridge.com.go.api.SkyScannerApi;
 import go.hackcambridge.com.go.api.TourApi;
+import go.hackcambridge.com.go.models.Hotel;
 import go.hackcambridge.com.go.models.Tour;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -63,6 +70,7 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 import static android.R.attr.orientation;
+import static android.R.attr.switchMinWidth;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback,
         GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener,
@@ -86,7 +94,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     // Retrofit
     Retrofit mRetrofit;
+    Retrofit mRetrofit2;
     TourApi mTourApi;
+    SkyScannerApi mSkyScannerApi;
 
     // tours
     ArrayList<Tour> mTours;
@@ -113,6 +123,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     // author
     TextView mAuthorTv;
 
+    // name of propert
+    TextView mPropertyName;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -135,7 +147,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .baseUrl(IConstants.API_URL)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
+        mRetrofit2 = new Retrofit.Builder()
+                .baseUrl(IConstants.SKYSCANNER_URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
         mTourApi = mRetrofit.create(TourApi.class);
+        mSkyScannerApi = mRetrofit2.create(SkyScannerApi.class);
         mTours = new ArrayList();
         mapFragment.getMapAsync(this);
         createLocationRequest();
@@ -203,6 +220,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
             }
         });
+        mPropertyName = (TextView)findViewById(R.id.propertyName);
+
     }
 
     private void setMediaUrl(String url) {
@@ -250,6 +269,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 //            mMap.setInfoWindowAdapter(new CustomInfoWindow(getApplicationContext()));
             getTours();
 
+
             //createLocationRequest();
         } else {
             // Show rationale and request permission.
@@ -258,11 +278,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
             @Override
             public boolean onMarkerClick(Marker marker) {
-                mIsNewTrack = true;
-                mAuthorTv.setText(String.format("Posted by: %s", mTours.get(mSelectedMarkerPos).getAuthor()));
-                mInfoCard.setVisibility(View.VISIBLE);
-                int pos = (int) marker.getTag() - 1;
-                mSelectedMarkerPos = pos;
+                if (marker.getTag() != null) {
+                    mIsNewTrack = true;
+                    mAuthorTv.setText(String.format("Posted by: %s", mTours.get(mSelectedMarkerPos).getAuthor()));
+                    mInfoCard.setVisibility(View.VISIBLE);
+                    mPropertyName.setText(mTours.get(mSelectedMarkerPos).getName());
+                    int pos = (int) marker.getTag() - 1;
+                    mSelectedMarkerPos = pos;
+                    return false;
+                }
                 return false;
             }
         });
@@ -275,6 +299,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 }
             }
         });
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        switch(requestCode) {
+            case IConstants.REQUEST_RECORD_ACTIVITY:
+                getTours();
+                break;
+        }
     }
 
     private Bitmap getBitmap(int drawableRes) {
@@ -302,6 +336,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         marker.setTag(mTours.size());
                         marker.setZIndex(1.0f);
                     }
+                    getSkyScannerResults();
+
                 } else {
                     Log.d(TAG, "NO DATA");
                 }
@@ -313,6 +349,32 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         });
 
+    }
+
+    private void getSkyScannerResults() {
+        Call<ArrayList<Hotel>> hotelsCall = mTourApi.getHotels();
+        hotelsCall.enqueue(new Callback<ArrayList<Hotel>>() {
+            @Override
+            public void onResponse(Call<ArrayList<Hotel>> call, Response<ArrayList<Hotel>> response) {
+                if (!response.body().isEmpty()) {
+                    for (Hotel hotel: response.body()) {
+                        Log.d(TAG, hotel.getLati() + "," + hotel.getLongi());
+                        Marker marker = mMap.addMarker(new MarkerOptions()
+                                .position(new LatLng(hotel.getLati(), hotel.getLongi()))
+                                .icon(BitmapDescriptorFactory.fromBitmap(getBitmap(R.drawable.ic_hotel))));
+                        marker.setTitle(hotel.getName());
+
+
+                    }
+                }
+
+            }
+
+            @Override
+            public void onFailure(Call<ArrayList<Hotel>> call, Throwable t) {
+
+            }
+        });
     }
 
     private void createLocationRequest() {

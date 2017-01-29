@@ -15,7 +15,16 @@ public class Tour {
     private String audioUrlSpa;
     private String audioUrlEng;
     private String audioUrlFre;
+    private String name;
 
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 
     public String getAuthor() {
         return author;
