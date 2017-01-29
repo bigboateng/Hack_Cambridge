@@ -1,5 +1,6 @@
 package go.hackcambridge.com.go;
 
+import android.app.ProgressDialog;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.net.Uri;
@@ -12,6 +13,8 @@ import android.webkit.MimeTypeMap;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -73,10 +76,14 @@ public class ActivityRecord extends AppCompatActivity implements View.OnClickLis
 
     Retrofit mRetrofit;
     TourApi mTourApi;
+    EditText mAuthorEditText;
 
     // language chooser
     Spinner mLanguageChooserSpinner;
     String mChosenLanguage = IConstants.ENGLISH;
+
+    // progress bar when posting
+    ProgressDialog mProgress;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -104,6 +111,7 @@ public class ActivityRecord extends AppCompatActivity implements View.OnClickLis
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
         mTourApi = mRetrofit.create(TourApi.class);
+        mProgress = new ProgressDialog(this);
     }
 
     private void setupUi() {
@@ -122,7 +130,7 @@ public class ActivityRecord extends AppCompatActivity implements View.OnClickLis
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 mChosenLanguage = IConstants.LANGUAGES[position];
-                Toast.makeText(getApplicationContext(), "Language = " + mChosenLanguage, Toast.LENGTH_LONG).show();
+                //Toast.makeText(getApplicationContext(), "Language = " + mChosenLanguage, Toast.LENGTH_LONG).show();
             }
 
             @Override
@@ -130,6 +138,8 @@ public class ActivityRecord extends AppCompatActivity implements View.OnClickLis
 
             }
         });
+        mAuthorEditText = (EditText)findViewById(R.id.authorEditText);
+
     }
 
     @Override
@@ -158,6 +168,7 @@ public class ActivityRecord extends AppCompatActivity implements View.OnClickLis
                 break;
             case R.id.sendtoserver:
                 // create upload service client
+                mProgress.show();
                 File file = new File(mAudioDir);
                 // create RequestBody instance from file
                 final RequestBody requestFile =
@@ -190,6 +201,7 @@ public class ActivityRecord extends AppCompatActivity implements View.OnClickLis
                                 tour.setAudioUrl(response.body().getUrl());
                                 break;
                         }
+                        tour.setAuthor(mAuthorEditText.getText().toString());
                         Call<TourPostResponse> call2 = mTourApi.postTourData(tour);
                         Log.d(TAG, "URL = " + response.body().getUrl());
                         postTourData(call2);
@@ -212,10 +224,12 @@ public class ActivityRecord extends AppCompatActivity implements View.OnClickLis
             public void onResponse(Call<TourPostResponse> call, Response<TourPostResponse> response) {
                 if (response.body().isSuccess()) {
                     Toast.makeText(getApplicationContext(), "Upload successful", Toast.LENGTH_LONG).show();
+                    mProgress.hide();
                     finish();
                 } else {
                     Toast.makeText(getApplicationContext(), "Error uploading audio", Toast.LENGTH_LONG).show();
                 }
+
             }
 
             @Override

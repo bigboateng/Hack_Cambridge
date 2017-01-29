@@ -49,6 +49,8 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.squareup.picasso.Picasso;
 
+import org.w3c.dom.Text;
+
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -108,6 +110,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     // mode
     String mMode;
 
+    // author
+    TextView mAuthorTv;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -143,6 +148,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             public void onCompletion(MediaPlayer mp) {
                 mInfoButton.setImageResource(R.drawable.ic_media_play_symbol);
                 mInfoCard.setVisibility(View.GONE);
+
             }
         });
 
@@ -173,6 +179,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 startActivityForResult(intent, IConstants.REQUEST_RECORD_ACTIVITY);
             }
         });
+        mAuthorTv = (TextView)findViewById(R.id.authorTv);
         mInfoCard = (CardView) findViewById(R.id.infoWindowCard);
         mInfoCard.setVisibility(View.GONE);
         mInfoButton = (ImageButton) findViewById(R.id.infoPlay);
@@ -252,10 +259,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             @Override
             public boolean onMarkerClick(Marker marker) {
                 mIsNewTrack = true;
+                mAuthorTv.setText(String.format("Posted by: %s", mTours.get(mSelectedMarkerPos).getAuthor()));
                 mInfoCard.setVisibility(View.VISIBLE);
                 int pos = (int) marker.getTag() - 1;
                 mSelectedMarkerPos = pos;
-//                Toast.makeText(getApplicationContext(), "Pos = " + pos, Toast.LENGTH_LONG).show();
                 return false;
             }
         });
@@ -367,7 +374,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             // getDeclination returns degrees
             mDeclination = field.getDeclination();
 
-            updateUi();
+           // updateUi();
         }
     }
 

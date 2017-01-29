@@ -11,9 +11,19 @@ public class Tour {
     private long createdAt;
     private int rating;
     private int numOfRating;
+    private String author;
     private String audioUrlSpa;
     private String audioUrlEng;
     private String audioUrlFre;
+
+
+    public String getAuthor() {
+        return author;
+    }
+
+    public void setAuthor(String author) {
+        this.author = author;
+    }
 
     public String getAudioUrlSpa() {
         return audioUrlSpa;
