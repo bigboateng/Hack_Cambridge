@@ -120,6 +120,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     // mode
     String mMode;
 
+    Button mViewComments;
     // author
     TextView mAuthorTv;
 
@@ -170,6 +171,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         });
 
         // hide record button if tour mode
+        mViewComments = (Button)findViewById(R.id.viewComments);
+        mViewComments.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MapsActivity.this, CommentsActivity.class);
+                Tour t = mTours.get(mSelectedMarkerPos);
+                intent.putExtra("comment-id", t.getAudioUrl());
+                startActivityForResult(intent, IConstants.REQUEST_COMMENTS_ACTIVITY);
+            }
+        });
 
     }
 

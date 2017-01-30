@@ -96,7 +96,15 @@
 
                 </LinearLayout>
 
+                <Button
+                    android:id="@+id/viewComments"
+                    android:layout_gravity="center"
+                    android:text="VIEW COMMENTS"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+
                 <Spinner
+                    android:visibility="gone"
                     android:id="@+id/languagesSpinner"
                     android:layout_width="match_parent"
                     android:layout_height="?android:attr/listPreferredItemHeight">

@@ -5,7 +5,8 @@ package go.hackcambridge.com.go;
  */
 
 public interface IConstants {
-    static int REQUEST_RECORD_ACTIVITY = 100;
+    int REQUEST_RECORD_ACTIVITY = 100;
+    int REQUEST_COMMENTS_ACTIVITY = 101;
 
     // api url
     String API_URL = "https://go-hackcambridge.herokuapp.com";
